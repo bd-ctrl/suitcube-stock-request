@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stock Request - Suitcube iOS 26 Edition</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=Quicksand:wght@400;600;700&family=Playwrite+GB+J:wght@100..400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --ci-gold: #D9AE5D;
+            --ci-gold-dark: #8a632d;
+            --ci-gold-light: #fdf8ee;
+            --ci-gold-bubble: #f6ebd8;
+            --suitcube-red: #9e2a2b;
+            --suitcube-red-light: #fdf2f2;
+            --text-dark: #1e293b;
+            --bg-beige: #f4f4f0; /* Ultra clean warm-clay beige */
+            --ios-blur-bg: rgba(255, 255, 255, 0.75);
+            --bubble-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+            --bubble-shadow-hover: 0 20px 40px -5px rgba(217, 174, 93, 0.08), 0 1px 5px rgba(0,0,0,0.03);
+            --bubble-shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        body {
+            font-family: 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-beige);
+            color: #334155;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            letter-spacing: -0.01em;
+        }
+
+        .font-playwrite { font-family: 'Playwrite GB J', cursive; }
+        .font-quicksand { font-family: 'Quicksand', sans-serif; }
+
+        .ios-bubble-card {
+            background: var(--ios-blur-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            box-shadow: var(--bubble-shadow);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .ios-bubble-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--bubble-shadow-hover);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Tactile bouncy buttons */
+        .bubble-btn {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bubble-btn:active {
+            transform: scale(0.93);
+            filter: brightness(0.95);
+        }
+
+        /* High-fidelity custom scrollbar matching iOS */
+        .custom-scroll::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 99px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.12);
+            border-radius: 99px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.24);
+        }
+
+        /* Beautiful bubble styling for size boxes */
+        .bubble-size-input {
+            font-family: 'Quicksand', sans-serif;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            background-color: #eef1ee;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            box-shadow: var(--bubble-shadow-inset);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .bubble-size-input:focus {
+            background-color: white;
+            border-color: var(--ci-gold);
+            box-shadow: 0 0 0 4px rgba(217, 174, 93, 0.15);
+            transform: scale(1.12);
+            outline: none;
+        }
+
+        /* Highlight active inputs with values */
+        .bubble-size-input.has-value {
+            background-color: var(--ci-gold-bubble);
+            color: var(--ci-gold-dark);
+            border-color: rgba(217, 174, 93, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Beautiful numeric pill box */
+        .bubble-total-badge {
+            font-family: 'Quicksand', sans-serif;
+            width: 46px;
+            height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* iOS fluid animations */
+        @keyframes modalPop {
+            0% { transform: scale(0.9) translateY(40px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .animate-modal {
+            animation: modalPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes rowInsert {
+            0% { transform: translateY(15px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-row {
+            animation: rowInsert 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Remove arrows on numeric fields */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* พรีเมียมเฉดสีสว่างหรูหรา ถอดแบบสีตามภาพตัวอย่าง */
+        .header-bg {
+            position: relative;
+            background: linear-gradient(135deg, 
+                #8e652a 0%, 
+                #ecdcb9 45%, 
+                #b0b8bc 100%
+            );
+        }
+
+        /* ส่วนเกรนละเอียด เพิ่มความพรีเมียมหรูหรา */
+        .header-grain {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.12;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* การไล่ระดับสีจากเฉดสีรูปภาพด้านบนให้จางหายเข้าหาโทนพื้นหลังครีมเบจธรรมชาติอย่างนุ่มนวลสุดๆ */
+        .header-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, 
+                rgba(244, 244, 240, 0) 0%, 
+                rgba(244, 244, 240, 0.3) 30%, 
+                rgba(244, 244, 240, 0.75) 65%, 
+                #f4f4f0 100%
+            );
+            z-index: 1;
+        }
+
+        /* สไตล์หน้าต่างนาฬิกา iOS 26: สี่เหลี่ยมสีขาวใสโปร่งแสง 30% ตกแต่งขอบละมุน */
+        .ios-clock-widget {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* สไตล์ไอเทมลิสต์ของอุปกรณ์เสริมแบบพรีเมียมและเรียบหรู */
+        .accessory-item-card {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .accessory-item-card:hover {
+            background: white;
+            border-color: rgba(217, 174, 93, 0.25);
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(217, 174, 93, 0.04);
+        }
+
+        .accessory-item-card.active-filled {
+            background: var(--ci-gold-light);
+            border-color: rgba(217, 174, 93, 0.4);
+            box-shadow: 0 6px 18px rgba(217, 174, 93, 0.06);
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="header-bg pt-10 pb-20 px-6 relative overflow-hidden">
+        <!-- เอฟเฟกต์เกรนละเอียดและการไล่ระดับสีละมุนเป็นพิเศษ -->
+        <div class="header-grain"></div>
+        <div class="header-overlay"></div>
+
+        <div class="max-w-[1100px] mx-auto flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 relative z-10">
+            
+            <!-- App Identity (ลบข้อความวันเวลาเดิมฝั่งซ้ายออกเพื่อความเรียบร้อย) -->
+            <div class="flex items-center">
+                <h1 class="font-playwrite text-[38px] md:text-[44px] font-extrabold text-slate-800 leading-none">
+                    Stock Request
+                </h1>
+            </div>
+
+            <!-- กล่องควบคุมขวา: รวมกล่องกรอกข้อมูล และ iOS Clock Widget ถัดไปขวาบนสุดหลังผู้เบิก -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:gap-6 w-full lg:w-auto">
+                
+                <!-- iOS Info Selectors Bubble (กระจกใสสีสว่าง) -->
+                <div class="ios-bubble-card p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/60 max-w-md w-full sm:w-auto">
+                    
+                    <!-- Branch Code Selector (ปรับหัวข้อ label-branch เป็น font-normal ตามที่สั่ง) -->
+                    <div class="px-5 py-2.5 flex flex-col justify-center flex-1 sm:flex-none sm:w-44">
+                        <label id="label-branch" class="text-[14px] font-normal text-slate-500 mb-1 transition-colors">สาขาที่เบิก</label>
+                        <div class="relative flex items-center">
+                            <select id="branch-select" class="w-full text-[16px] font-extrabold text-[#8a632d] bg-transparent outline-none cursor-pointer appearance-none">
+                                <option>BP</option>
+                                <option>PK</option>
+                                <option>RCD</option>
+                                <option>SC</option>
+                                <option>T21</option>
+                                <option>R3</option>
+                                <option>KR</option>
+                                <option>CM</option>
+                                <option>FP</option>
+                                <option>PM</option>
+                                <option>NW</option>
+                                <option>SL</option>
+                                <option>SQ1</option>
+                                <option>CC</option>
+                                <option>KK</option>
+                            </select>
+                            <div class="absolute right-0 pointer-events-none text-[#8a632d]/60 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nickname Input (ปรับหัวข้อ label-user และช่องกรอกอินพุตเป็น font-normal ตามที่สั่ง) -->
+                    <div class="px-5 py-2.5 flex flex-col justify-center flex-1 sm:flex-none sm:w-52">
+                        <label id="label-user" class="text-[14px] font-normal text-slate-500 mb-1 transition-colors">ผู้เบิก (ชื่อเล่น)</label>
+                        <input type="text" id="requester-name" placeholder="ระบุชื่อ..." class="w-full text-[16px] font-normal text-slate-800 placeholder-slate-400 bg-transparent outline-none border-none p-0 focus:ring-0">
+                    </div>
+                </div>
+
+                <!-- พรีเมียม iOS 26 Clock Widget (ปรับปรุงเป็นสีขาวใสโปร่งแสง 30% และแสดงเวลาเป็น HH:MM ตามที่ระบุ) -->
+                <div class="flex flex-col items-center justify-center ios-clock-widget px-5 py-2.5 min-w-[125px] text-center self-end sm:self-auto">
+                    <div id="current-time-large" class="text-[34px] font-bold text-slate-800 leading-none tracking-tight drop-shadow-sm font-quicksand">
+                        --:--
+                    </div>
+                    <div id="current-date-small" class="text-[11px] font-bold text-slate-600 tracking-wide mt-1 font-quicksand uppercase">
+                        ---, -- ---
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ปรับความกว้างหลัก (max-w) และระยะห่างแนวตั้ง (space-y-4) เพื่อลดช่องว่างให้กระชับพรีเมียมขึ้นตามรูปที่ส่งมา -->
+    <main class="max-w-[1100px] mx-auto px-4 md:px-6 -mt-10 relative z-30 space-y-4">
+        
+        <!-- Section 1: Product SKU Dynamic List -->
+        <section class="space-y-4 pt-4">
+            <!-- ปรับปรุงใหม่: ถอด 'ios-bubble-card' และ 'p-4' ออกจากช่องค้นหาตามต้องการเพื่อให้กรอบสี่เหลี่ยมสีขาวด้านนอกหายไปอย่างสมบูรณ์ -->
+            <div class="relative flex items-center bg-slate-100 rounded-2xl px-4 py-3.5 shadow-inner">
+                <svg class="text-slate-400 mr-2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="sku-search-input" oninput="filterTableRows(this.value)" placeholder="พิมพ์ค้นหารหัสสินค้าในหน้านี้..." class="w-full bg-transparent outline-none text-slate-700 font-normal placeholder-slate-400 text-sm">
+                <button onclick="clearSearchFilter()" id="clear-search-btn" class="hidden text-slate-400 hover:text-slate-600 ml-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Main Bubbly Table Container -->
+            <div class="ios-bubble-card overflow-hidden">
+                <div class="overflow-x-auto custom-scroll">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr class="bg-white/40 border-b border-slate-200/50">
+                                <!-- ส่วนหัวข้อใช้ฟอนต์ Playwrite ตัวเขียนพรีเมียมอย่างสมมาตรลงตัว -->
+                                <th class="p-4 font-playwrite text-[15px] font-normal text-slate-600 tracking-tight w-48">SKU</th>
+                                <th class="p-4 font-playwrite text-[15px] font-normal text-slate-600 tracking-tight w-40 text-center">Category</th>
+                                <th class="p-4 font-playwrite text-[15px] font-normal text-slate-600 tracking-tight">Size & Qty</th>
+                                <th class="p-4 font-playwrite text-[15px] font-normal text-slate-600 tracking-tight w-24 text-center">Total</th>
+                                <th class="p-4 w-28 text-right"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-table-body" class="divide-y divide-slate-100">
+                            <!-- Injected dynamically through JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: อุปกรณ์อื่นๆ (ปรับเป็นแบบ Responsive และลด Spacing ระยะห่างลงเพื่อให้พรีเมียมกระชับขึ้น) -->
+        <section class="space-y-4">
+            <div class="ios-bubble-card p-4 md:p-6 lg:p-8">
+                <!-- คอลัมน์หลัก: หน้าจอขนาดใหญ่และแท็บเล็ตแสดงผลแนวนอน 3 คอลัมน์ (lg:grid-cols-3) หน้าจอมือถือแสดงผลแนวตั้งเรียงต่อกันเป็นชั้นสมบูรณ์แบบไม่ล้นขอบ -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                    
+                    <!-- ส่วนที่ 1: Packaging -->
+                    <div class="flex flex-col bg-white/30 rounded-[24px] border border-white/40 p-4 md:p-5 shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 border-b border-slate-200/40 pb-3 flex-shrink-0">
+                            <h3 class="font-playwrite text-slate-600 text-[15px] font-normal leading-none">Packaging</h3>
+                        </div>
+                        <!-- จำกัดความสูงไว้ที่ 224px (แสดงผล 3 แถวสวยงามพอดี) และเปิดการ Scroll Down เฉพาะจุด -->
+                        <div class="flex-1 overflow-y-auto custom-scroll max-h-[224px] pr-1 space-y-2.5" id="acc-col-packaging">
+                            <!-- Injected by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- ส่วนที่ 2: Document -->
+                    <div class="flex flex-col bg-white/30 rounded-[24px] border border-white/40 p-4 md:p-5 shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 border-b border-slate-200/40 pb-3 flex-shrink-0">
+                            <h3 class="font-playwrite text-slate-600 text-[15px] font-normal leading-none">Document</h3>
+                        </div>
+                        <!-- จำกัดความสูงไว้ที่ 224px (แสดงผล 3 แถวสวยงามพอดี) และเปิดการ Scroll Down เฉพาะจุด -->
+                        <div class="flex-1 overflow-y-auto custom-scroll max-h-[224px] pr-1 space-y-2.5" id="acc-col-document">
+                            <!-- Injected by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- ส่วนที่ 3: Tailoring Tools -->
+                    <div class="flex flex-col bg-white/30 rounded-[24px] border border-white/40 p-4 md:p-5 shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 border-b border-slate-200/40 pb-3 flex-shrink-0">
+                            <h3 class="font-playwrite text-slate-600 text-[15px] font-normal leading-none">Tailoring Tools</h3>
+                        </div>
+                        <!-- จำกัดความสูงไว้ที่ 224px (แสดงผลครบ 3 แถวพอดีอย่างงดงาม) ขอบล่างเรียงสมมาตรแนวเดียวกันทั้งหมด -->
+                        <div class="flex-1 overflow-y-auto custom-scroll max-h-[224px] pr-1 space-y-2.5" id="acc-col-tailoring">
+                            <!-- Injected by JavaScript -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ส่วนท้ายปุ่มกดกระชับสัดส่วน (ปรับการออกแบบปุ่มสองปุ่มใหม่ให้หรูหราสอดรับกับสไตล์ iOS 26) -->
+        <div class="flex flex-col sm:flex-row justify-end items-center gap-4 pt-2">
+            <!-- ปุ่ม "ล้างข้อมูล" โฉมใหม่: พื้นสีขาวใสกระจกฝ้า ขอบโค้งบางสวยงาม ข้อความสีแดงคมชัด -->
+            <button onclick="openConfirmResetModal()" class="bubble-btn w-full sm:w-auto h-14 px-10 rounded-[20px] bg-white/70 border border-slate-200/50 backdrop-blur-md text-[#9e2a2b] font-medium transition-all shadow-sm flex items-center justify-center hover:bg-white hover:border-red-200 active:bg-slate-100">
+                ล้างข้อมูล
+            </button>
+            <!-- ปุ่ม "ส่งแบบเบิกสินค้า" โฉมใหม่: พรีเมียมแรสเตอร์สีดำคมเข้ม CI ของ Suitcube -->
+            <button onclick="prepareSummary()" class="bubble-btn w-full sm:w-auto h-14 px-16 rounded-[20px] bg-slate-900 text-white font-extrabold text-lg shadow-[0_10px_25px_-5px_rgba(30,41,59,0.4)] transition-all flex items-center justify-center hover:bg-slate-800 active:scale-95">
+                ส่งแบบเบิกสินค้า
+            </button>
+        </div>
+    </main>
+
+    <!-- หน้าต่างสรุปข้อมูล (Summary Report Modal) -->
+    <div id="summary-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] hidden flex items-center justify-center p-6 transition-opacity duration-300">
+        <div class="bg-white/95 backdrop-blur-lg w-full max-w-lg rounded-[35px] overflow-hidden shadow-2xl border border-white/40 scale-95 opacity-0 transition-all duration-300 transform animate-modal">
+            
+            <!-- Modal Header -->
+            <div class="bg-[#D9AE5D] px-8 py-6 text-white flex justify-between items-center relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                <div class="relative z-10">
+                    <!-- ข้อ 1: สรุปรายการเบิกสินค้า ปรับเป็นตัวอักษรปกติ (font-normal) -->
+                    <h3 class="text-xl font-normal uppercase tracking-tight">สรุปรายการเบิกสินค้า</h3>
+                </div>
+                <button onclick="closeModal()" class="bubble-btn w-10 h-10 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-8 space-y-6 flex flex-col items-center">
+                <!-- Textbox with iOS style inset bubble look -->
+                <div id="summary-content" class="w-full bg-slate-100/70 p-6 rounded-[24px] border border-slate-200/50 text-slate-600 font-medium whitespace-pre-wrap max-h-[40vh] overflow-y-auto text-[14px] leading-relaxed custom-scroll shadow-inner mb-2" style="font-family: 'Noto Sans Thai', sans-serif;">
+                    <!-- Text report compiled by prepareSummary() -->
+                </div>
+                
+                <!-- ข้อ 2: ปุ่ม "ยืนยันการเบิก" เปลี่ยนสีเป็นสีดำ CI (bg-slate-900) ปรับระดับความกว้างที่น่ามองและอวบขึ้น (px-16 และ h-14) -->
+                <div class="flex flex-col items-center w-full">
+                    <button id="copy-btn" onclick="sendToLarkBase()" class="bubble-btn w-auto px-16 h-14 bg-slate-900 text-white rounded-full font-normal text-base shadow-[0_8px_20px_-4px_rgba(30,41,59,0.35)] flex items-center justify-center gap-2">
+                        <span id="btn-text">ยืนยันการเบิก</span>
+                    </button>
+                    <p id="copy-status" class="text-center text-emerald-600 font-bold text-xs transition-all duration-300 opacity-0 transform translate-y-1 mt-2">
+                        ส่งข้อมูลรายการเบิกสำเร็จแล้ว และบันทึกข้อมูลลงระบบเรียบร้อย!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้าต่างยืนยันการล้างข้อมูลดีไซียม (Reset Confirmation Modal) -->
+    <div id="confirm-reset-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] hidden flex items-center justify-center p-6 transition-opacity duration-300">
+        <div class="bg-white/95 backdrop-blur-lg w-full max-sm:max-w-[340px] max-w-sm rounded-[30px] overflow-hidden shadow-2xl border border-white/40 scale-95 opacity-0 transition-all duration-300 transform animate-modal">
+            
+            <!-- Modal Header -->
+            <div class="bg-[#9e2a2b] px-6 py-5 text-white flex justify-between items-center relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+                <div class="relative z-10 flex items-center gap-2">
+                    <h3 class="text-lg font-normal tracking-tight">ยืนยันการล้างข้อมูล</h3>
+                </div>
+                <button onclick="closeConfirmResetModal()" class="bubble-btn w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-6 text-center space-y-6">
+                <div class="space-y-2">
+                    <p class="text-slate-600 text-sm leading-relaxed font-semibold">
+                        คุณต้องการล้างรายการสินค้า รหัสสินค้า และอุปกรณ์ทั้งหมดที่กรอกไว้ใช่หรือไม่?
+                    </p>
+                    <p class="text-xs text-slate-400">
+                        *ข้อมูลที่กรอกไว้ทั้งหมดจะหายไปและไม่สามารถกู้คืนได้
+                    </p>
+                </div>
+                
+                <!-- Action Buttons: ล้างข้อมูล (แดง Suitcube) และยกเลิก (ตัวบางทั้งหมด) -->
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button onclick="closeConfirmResetModal()" class="bubble-btn py-3.5 bg-slate-100 hover:bg-slate-200/80 text-slate-500 rounded-xl font-normal text-sm transition-all shadow-sm">
+                        ยกเลิก
+                    </button>
+                    <button onclick="executeReset()" class="bubble-btn py-3.5 bg-[#9e2a2b] text-white hover:brightness-110 rounded-xl font-normal text-sm transition-all shadow-md shadow-red-900/10">
+                        ล้างข้อมูล
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้าต่างแจ้งเตือนข้อผิดพลาดพรีเมียม (Premium Validation Warning Modal) -->
+    <div id="validation-warning-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden flex items-center justify-center p-6 transition-opacity duration-300">
+        <div class="bg-white/95 backdrop-blur-lg w-full max-sm:max-w-[340px] max-w-sm rounded-[30px] overflow-hidden shadow-2xl border border-white/40 scale-95 opacity-0 transition-all duration-300 transform animate-modal">
+            
+            <!-- Warning Header -->
+            <div class="bg-[#9e2a2b] px-6 py-5 text-white flex justify-between items-center relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+                <div class="relative z-10">
+                    <h3 class="text-lg font-normal tracking-tight">ไม่สามารถส่งแบบเบิกได้</h3>
+                </div>
+                <button onclick="closeValidationWarningModal()" class="bubble-btn w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Warning Body -->
+            <div class="p-6 text-center space-y-6">
+                <div class="space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-red-50 text-[#9e2a2b] flex items-center justify-center mx-auto mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <p class="text-slate-600 text-base font-semibold" id="validation-warning-message">
+                        ยังไม่ได้กรอกรหัสสินค้า
+                    </p>
+                    <p class="text-xs text-slate-400">
+                        กรุณากรอกรหัสสินค้าในแถวที่มีการระบุจำนวนให้ครบถ้วนก่อนส่งเบิก
+                    </p>
+                </div>
+                
+                <div class="pt-2">
+                    <button onclick="closeValidationWarningModal()" class="bubble-btn w-full py-3.5 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl font-normal text-sm transition-all shadow-sm">
+                        รับทราบ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sizesData = {
+            jacket: [46, 48, 50, 52, 54, 56, 58, 60],
+            transparent: [29, 30, 31, 32, 33, 34, 36, 38, 40],
+            pant: [29, 30, 31, 32, 33, 34, 36, 38, 40],
+            shirt: {
+                alpha: ['S', 'M', 'L', 'XL', 'XXL'],
+                numeric: [46, 48, 50, 52, 54, 56]
+            },
+            vest: [48, 50, 52, 54, 56, 58],
+            shoes: [39, 40, 41, 42, 43, 44, 45, 46], // เพิ่มขนาด 45 และ 46 เรียบร้อยแล้ว
+            accessory: []
+        };
+
+        // แยกข้อมูลอุปกรณ์สิ้นเปลืองออกเป็น 3 หมวดหมู่ตามสั่ง (ข้อ 1: เปลี่ยน Section 1 เป็น Packaging)
+        const accessoriesSectionPackaging = [
+            "ถุงสูท", "ไม้แขวน", "ไม้หนีบกางเกง", "ถุงผ้า", "ถุงกระดาษ", "กระดาษใบเสร็จ", "ถุงบรรจุเสื้อเชิ้ต"
+        ];
+
+        const accessoriesSectionDocument = [
+            "ใบนับสต๊อก", "ใบโอนสินค้า", "ใบงานสำเร็จรูป", "ใบงานสั่งตัด", "ใบจองสินค้า", "สมุดแก้ทรง", "สมุดตัดสูท",
+            "สมุดตัดกางเกง", "สมุดตัดเชิ้ต", "สมุดตัดกระโปรง"
+        ];
+
+        const accessoriesSectionTailoring = [
+            "ที่เลาะกระเป๋า", "เข็มหมุด", "กรรไกรตัดด้าย"
+        ];
+
+        let products = [{ id: Date.now(), sku: '', type: 'jacket', sizes: {}, total: 0 }];
+
+        // Real-time calculation and state preservation
+        // อัปเดตเพื่อให้ส่งค่า payload ที่ Lark ต้องการได้ง่ายขึ้น
+        function updateProduct(id, field, value) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            if (field === 'type') { 
+                p.type = value; 
+                p.sizes = {}; 
+                p.total = 0;
+                renderTable(); // Re-render correct template sizing dynamically
+            } else if (field === 'sku') { 
+                p.sku = value; 
+                triggerActiveFilter(); // Maintain filter view if search matches
+            }
+        }
+
+        // Live calculations matching requirements
+        function updateSize(id, size, value) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            const val = parseInt(value) || 0;
+            if (val > 0) {
+                p.sizes[size] = val;
+            } else {
+                delete p.sizes[size];
+            }
+            
+            p.total = Object.values(p.sizes).reduce((a, b) => a + b, 0);
+            
+            // Render specific total bubble dynamic style
+            const totalEl = document.getElementById(`total-${id}`);
+            if (totalEl) {
+                if (p.type === 'accessory') {
+                    totalEl.value = p.total || '';
+                } else {
+                    totalEl.textContent = p.total;
+                    if (p.total > 0) {
+                        totalEl.classList.remove('bg-slate-100', 'text-slate-800');
+                        totalEl.classList.add('bg-[#D9AE5D]', 'text-white', 'scale-105');
+                    } else {
+                        totalEl.classList.remove('bg-[#D9AE5D]', 'text-white', 'scale-105');
+                        totalEl.classList.add('bg-slate-100', 'text-slate-800');
+                    }
+                }
+            }
+
+            // Highlight target size input if it has a non-zero count
+            const inputEl = document.getElementById(`input-${id}-${size}`);
+            if (inputEl) {
+                if (val > 0) {
+                    inputEl.classList.add('has-value');
+                } else {
+                    inputEl.classList.remove('has-value');
+                }
+            }
+        }
+
+        // Bouncy slide row handlers
+        function addRow(afterId) {
+            const index = products.findIndex(p => p.id === afterId);
+            const newRow = { id: Date.now(), sku: '', type: 'jacket', sizes: {}, total: 0 };
+            products.splice(index + 1, 0, newRow);
+            renderTable();
+            triggerActiveFilter();
+        }
+
+        // Add Row at End
+        function addNewRowAtEnd() {
+            const newRow = { id: Date.now(), sku: '', type: 'jacket', sizes: {}, total: 0 };
+            products.push(newRow);
+            renderTable();
+            triggerActiveFilter();
+        }
+
+        // Remove Row
+        function removeRow(id) {
+            if (products.length > 1) {
+                products = products.filter(p => p.id !== id);
+                renderTable();
+                triggerActiveFilter();
+            } else {
+                products[0] = { id: Date.now(), sku: '', type: 'jacket', sizes: {}, total: 0 };
+                renderTable();
+                triggerActiveFilter();
+            }
+        }
+
+        // Search & filter functionalities
+        function filterTableRows(query) {
+            const cleanQuery = query.trim().toLowerCase();
+            const rows = document.querySelectorAll('#product-table-body tr');
+            const clearBtn = document.getElementById('clear-search-btn');
+
+            if (cleanQuery) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            rows.forEach((row, index) => {
+                const product = products[index];
+                if (!product) return;
+                const skuMatch = product.sku.toLowerCase().includes(cleanQuery);
+                const catMatch = product.type.toLowerCase().includes(cleanQuery);
+                
+                if (!cleanQuery || skuMatch || catMatch) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        // Reset search filter
+        function clearSearchFilter() {
+            const searchInput = document.getElementById('sku-search-input');
+            searchInput.value = '';
+            filterTableRows('');
+        }
+
+        // Trigger Active Filter
+        function triggerActiveFilter() {
+            const searchVal = document.getElementById('sku-search-input').value;
+            filterTableRows(searchVal);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('product-table-body');
+            tbody.innerHTML = products.map((p, idx) => {
+                let sizeControls = '';
+                if (p.type === 'accessory') {
+                    // "ไม่ต้องระบุไซซ์สำหรับหมวดนี้" เป็นตัวบาง สีเดียวกับ category dropdown และไม่มี button/pill คลุม
+                    sizeControls = `
+                        <div class="text-[#D9AE5D] italic text-[14px] font-bold tracking-wide py-2.5 animate-row">
+                            ไม่ต้องระบุไซซ์สำหรับหมวดนี้
+                        </div>`;
+                } else if (p.type === 'shirt') {
+                    sizeControls = `
+                        <div class="flex flex-col gap-3 animate-row">
+                            <!-- ปรับแก้ข้อที่ 1: นำหัวข้อระบุกลุ่ม "Alpha" และ "Num" ออกเพื่อดีไซน์ที่กระชับและคลีนขึ้นสูงสุด -->
+                            <div class="flex flex-wrap gap-2 items-center">
+                                ${sizesData.shirt.alpha.map(s => `
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] font-bold text-slate-400 mb-0.5 uppercase font-quicksand">${s}</span>
+                                        <input type="number" inputmode="decimal" pattern="[0-9]*" id="input-${p.id}-${s}" value="${p.sizes[s] || ''}" oninput="updateSize(${p.id}, '${s}', this.value)" 
+                                               class="bubble-size-input ${p.sizes[s] ? 'has-value' : ''}" placeholder="">
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="flex flex-wrap gap-2 items-center">
+                                ${sizesData.shirt.numeric.map(s => `
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] font-bold text-slate-400 mb-0.5 uppercase font-quicksand">${s}</span>
+                                        <input type="number" inputmode="decimal" pattern="[0-9]*" id="input-${p.id}-${s}" value="${p.sizes[s] || ''}" oninput="updateSize(${p.id}, '${s}', this.value)" 
+                                               class="bubble-size-input ${p.sizes[s] ? 'has-value' : ''}" placeholder="">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    sizeControls = `
+                        <div class="flex flex-wrap gap-2 items-center animate-row">
+                            ${sizesData[p.type].map(s => `
+                                <div class="flex flex-col items-center">
+                                    <span class="text-[10px] font-bold text-slate-400 mb-0.5 uppercase font-quicksand">${s}</span>
+                                    <!-- นำเครื่องหมายขีด - ออกจากช่อง Placeholder -->
+                                    <input type="number" inputmode="decimal" pattern="[0-9]*" id="input-${p.id}-${s}" value="${p.sizes[s] || ''}" oninput="updateSize(${p.id}, '${s}', this.value)" 
+                                           class="bubble-size-input ${p.sizes[s] ? 'has-value' : ''}" placeholder="">
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                // Dynamic Total badge check
+                const isVal = p.total > 0;
+                const badgeColorClass = isVal ? 'bg-[#D9AE5D] text-white scale-105' : 'bg-slate-100 text-slate-800';
+
+                return `
+                <tr class="hover:bg-white/40 transition-colors animate-row">
+                    <!-- SKU Field (พิมพ์อักษรและเลข รหัสรวดเร็วด้วยฟอนต์ Noto Sans Thai และใช้ฟอนต์ตัวบาง font-normal สวยสบายตา) -->
+                    <td class="p-4 align-top">
+                        <input type="text" value="${p.sku}" oninput="updateProduct(${p.id}, 'sku', this.value)" 
+                               placeholder="รหัสสินค้า..." class="w-full px-4 py-3 bg-slate-100/60 border border-transparent rounded-[16px] outline-none focus:bg-white focus:border-[#D9AE5D]/30 font-normal text-slate-600 shadow-inner" style="font-family: 'Noto Sans Thai', sans-serif;">
+                    </td>
+                    
+                    <!-- Category Select -->
+                    <td class="p-4 align-top">
+                        <div class="relative flex items-center bg-white border border-slate-100 px-4 py-3 rounded-[16px] shadow-sm">
+                            <select onchange="updateProduct(${p.id}, 'type', this.value)" class="w-full uppercase font-bold text-sm text-[#D9AE5D] bg-transparent outline-none cursor-pointer appearance-none">
+                                <option value="jacket" ${p.type==='jacket'?'selected':''}>Jacket</option>
+                                <option value="pant" ${p.type==='pant'?'selected':''}>Pant</option>
+                                <option value="shirt" ${p.type==='shirt'?'selected':''}>Shirt</option>
+                                <option value="vest" ${p.type==='vest'?'selected':''}>Vest</option>
+                                <option value="shoes" ${p.type==='shoes'?'selected':''}>Shoes</option>
+                                <option value="accessory" ${p.type==='accessory'?'selected':''}>ACCESSORIES</option>
+                            </select>
+                            <div class="absolute right-3 pointer-events-none text-[#D9AE5D]/60 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Dynamic Size Grid -->
+                    <td class="p-4 align-top">
+                        ${sizeControls}
+                    </td>
+
+                    <!-- Total Display -->
+                    <td class="p-4 align-top text-center">
+                        ${p.type === 'accessory' ? `
+                            <input type="number" id="total-${p.id}" inputmode="decimal" pattern="[0-9]*" value="${p.sizes['qty'] || ''}" 
+                                   oninput="updateSize(${p.id}, 'qty', this.value)" 
+                                   placeholder="0"
+                                   class="bubble-total-badge bg-white border-2 border-[#D9AE5D]/30 text-[#D9AE5D] outline-none focus:border-[#D9AE5D] focus:scale-105 text-center">
+                        ` : `
+                            <div id="total-${p.id}" class="bubble-total-badge ${badgeColorClass}">
+                                ${p.total}
+                            </div>
+                        `}
+                    </td>
+
+                    <!-- Row Controls -->
+                    <td class="p-4 align-top">
+                        <div class="flex gap-2.5 justify-end mt-1.5">
+                            <button onclick="addRow(${p.id})" class="bubble-btn w-10 h-10 flex items-center justify-center rounded-full bg-[#D9AE5D]/10 text-[#8a632d] hover:bg-[#D9AE5D] hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5v14M5 12h14" /></svg>
+                            </button>
+                            <button onclick="removeRow(${p.id})" class="bubble-btn w-10 h-10 flex items-center justify-center rounded-full bg-red-50 text-[#9e2a2b] hover:bg-[#9e2a2b] hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // อัปเดตโครงสร้างการตรวจสอบคีย์ป้อนค่า และสลับสีของการ์ดไอเทมเมื่อคีย์ค่ามากกว่า 0
+        function onAccessoryInput(id, value) {
+            const inputEl = document.getElementById(id);
+            const parentCard = inputEl.closest('.accessory-item-card');
+            const val = parseInt(value) || 0;
+            
+            if (inputEl) {
+                if (val > 0) {
+                    inputEl.classList.add('has-value');
+                    if (parentCard) parentCard.classList.add('active-filled');
+                } else {
+                    inputEl.classList.remove('has-value');
+                    if (parentCard) parentCard.classList.remove('active-filled');
+                }
+            }
+        }
+
+        // ฟังก์ชันเรนเดอร์กลุ่มย่อยอุปกรณ์ทั้ง 3 คอลัมน์แบบแยกอิสระพร้อมสไตล์ iOS 26 Bubble
+        function renderAccessories() {
+            // ส่วนที่ 1: กลุ่มถุงและไม้แขวนสินค้า (Packaging)
+            const col1 = document.getElementById("acc-col-packaging");
+            col1.innerHTML = accessoriesSectionPackaging.map((item, localIdx) => {
+                const uniqueId = `acc-sec1-${localIdx}`;
+                return `
+                    <div class="accessory-item-card flex justify-between items-center py-2.5 px-4 border border-transparent rounded-2xl transition-all duration-300">
+                        <span class="text-[16px] font-medium text-slate-700 leading-tight">${item}</span>
+                        <input type="number" 
+                               id="${uniqueId}" 
+                               inputmode="decimal" 
+                               pattern="[0-9]*" 
+                               placeholder="" 
+                               oninput="onAccessoryInput('${uniqueId}', this.value)"
+                               class="bubble-size-input font-quicksand text-[#8a632d]">
+                    </div>
+                `;
+            }).join('');
+
+            // ส่วนที่ 2: กลุ่มเอกสาร Document
+            const col2 = document.getElementById("acc-col-document");
+            col2.innerHTML = accessoriesSectionDocument.map((item, localIdx) => {
+                const uniqueId = `acc-sec2-${localIdx}`;
+                return `
+                    <div class="accessory-item-card flex justify-between items-center py-2.5 px-4 border border-transparent rounded-2xl transition-all duration-300">
+                        <span class="text-[16px] font-medium text-slate-700 leading-tight">${item}</span>
+                        <input type="number" 
+                               id="${uniqueId}" 
+                               inputmode="decimal" 
+                               pattern="[0-9]*" 
+                               placeholder="" 
+                               oninput="onAccessoryInput('${uniqueId}', this.value)"
+                               class="bubble-size-input font-quicksand text-[#8a632d]">
+                    </div>
+                `;
+            }).join('');
+
+            // ส่วนที่ 3: กลุ่มเครื่องมือ Tailoring Tools
+            const col3 = document.getElementById("acc-col-tailoring");
+            col3.innerHTML = accessoriesSectionTailoring.map((item, localIdx) => {
+                const uniqueId = `acc-sec3-${localIdx}`;
+                return `
+                    <div class="accessory-item-card flex justify-between items-center py-2.5 px-4 border border-transparent rounded-2xl transition-all duration-300">
+                        <span class="text-[16px] font-semibold text-slate-700 leading-tight">${item}</span>
+                        <input type="number" 
+                               id="${uniqueId}" 
+                               inputmode="decimal" 
+                               pattern="[0-9]*" 
+                               placeholder="" 
+                               oninput="onAccessoryInput('${uniqueId}', this.value)"
+                               class="bubble-size-input font-quicksand text-[#8a632d]">
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function prepareSummary() {
+            // ดึงข้อมูลหลัก
+            const branch = document.getElementById('branch-select').value;
+            const requester = document.getElementById('requester-name').value || 'ไม่ได้ระบุ';
+            
+            // ดึงข้อความวันเวลาปัจจุบันและจัดฟอร์แมตในรูปแบบ DD/MM/YYYY HH:MM เพื่อใช้สำหรับสรุปในรายงาน (เหมาะสมกับการแชร์เข้า LINE)
+            const now = new Date();
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const yearStr = (now.getFullYear() + 543).toString(); // แปลงเป็น พ.ศ.
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const reportFormattedDateTime = `${day}/${month}/${yearStr} ${hours}:${minutes}`;
+
+            // --- ตรวจสอบรหัสสินค้าเว้นว่างขณะมีจำนวน (Validation Check) ---
+            let hasEmptySKU = false;
+            products.forEach(p => {
+                // หากมีการระบุจำนวนขนาดใด ๆ (total > 0) แต่ SKU เป็นช่องว่างเปล่า
+                if (p.total > 0 && p.sku.trim() === '') {
+                    hasEmptySKU = true;
+                }
+            });
+
+            // หากมีช่องรหัสสินค้าว่างเปล่า ให้เปิดโมดอล Validation แจ้งเตือน และหยุดฟังก์ชันทันที
+            if (hasEmptySKU) {
+                openValidationWarningModal("ยังไม่ได้กรอกรหัสสินค้า");
+                return;
+            }
+
+            // ข้อความรายงานหลัก (ข้อ 3: นำหัวข้อบรรทัด '📦 ใบเบิกสินค้า Suitcube' ออก)
+            let text = `📅 วันที่: ${reportFormattedDateTime}\n`;
+            text += `🏢 สาขาที่เบิก: ${branch}\n`;
+            text += `👤 ผู้เบิก: ${requester}\n`;
+            text += `---------------------------------\n\n`;
+
+            let hasContent = false;
+            products.forEach(p => {
+                if (p.sku.trim() !== '' || p.total > 0) {
+                    hasContent = true;
+                    const catLabel = p.type === 'accessory' ? 'ACCESSORIES' : p.type.toUpperCase();
+                    text += `🔹 [${catLabel}] SKU: ${p.sku || 'N/A'}\n`;
+                    if (p.type !== 'accessory') {
+                        const sizes = Object.entries(p.sizes)
+                            .filter(([s, q]) => q > 0)
+                            .map(([s, q]) => `${s}:${q}`)
+                            .join(', ');
+                        if (sizes) text += `   ไซซ์: ${sizes}\n`;
+                    }
+                    text += `   รวม: ${p.total} ชิ้น\n\n`;
+                }
+            });
+
+            // ตรวจสอบการนับรวมจำนวนอุปกรณ์สิ้นเปลืองอย่างถูกต้องตามโครงสร้างหมวดหมู่ใหม่
+            let hasAcc = false;
+            let accText = `🛠 อุปกรณ์อื่นๆ\n`;
+            
+            // ตรวจสอบ Section Packaging (Section 1)
+            let packagingTextLocal = "";
+            accessoriesSectionPackaging.forEach((item, localIdx) => {
+                const inputEl = document.getElementById(`acc-sec1-${localIdx}`);
+                if (inputEl) {
+                    const val = parseInt(inputEl.value) || 0;
+                    if (val > 0) {
+                        hasAcc = true;
+                        packagingTextLocal += `- ${item}: ${val} ชิ้น\n`;
+                    }
+                }
+            });
+            if (packagingTextLocal) {
+                accText += `[Packaging]\n${packagingTextLocal}\n`;
+            }
+
+            // ตรวจสอบ Document (Section 2)
+            let documentTextLocal = "";
+            accessoriesSectionDocument.forEach((item, localIdx) => {
+                const inputEl = document.getElementById(`acc-sec2-${localIdx}`);
+                if (inputEl) {
+                    const val = parseInt(inputEl.value) || 0;
+                    if (val > 0) {
+                        hasAcc = true;
+                        documentTextLocal += `- ${item}: ${val} ชิ้น\n`;
+                    }
+                }
+            });
+            if (documentTextLocal) {
+                accText += `[Document]\n${documentTextLocal}\n`;
+            }
+
+            // ตรวจสอบ Tailoring Tools (Section 3)
+            let tailoringTextLocal = "";
+            accessoriesSectionTailoring.forEach((item, localIdx) => {
+                const inputEl = document.getElementById(`acc-sec3-${localIdx}`);
+                if (inputEl) {
+                    const val = parseInt(inputEl.value) || 0;
+                    if (val > 0) {
+                        hasAcc = true;
+                        tailoringTextLocal += `- ${item}: ${val} ชิ้น\n`;
+                    }
+                }
+            });
+            if (tailoringTextLocal) {
+                accText += `[Tailoring Tools]\n${tailoringTextLocal}\n`;
+            }
+
+            if (hasAcc) { 
+                text += accText; 
+                hasContent = true; 
+            }
+            if (!hasContent) {
+                text += `(ไม่มีรายการสินค้า)\n`;
+            }
+
+            document.getElementById('summary-content').innerText = text;
+            
+            // Present Modal with smooth animation classes
+            const modal = document.getElementById('summary-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.firstElementChild.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        // โครงสร้างโค้ดสำหรับดึง Lark tenant_access_token (สำหรับกรณีต้องการเชื่อมต่อเพิ่มเติมในอนาคต)
+        async function getLarkTenantAccessToken() {
+            const appId = "cli_a95f631778789eef";
+            const appSecret = "yG5ILXA0V6fy6jmCNVdX4eh6mRYTDTay";
+            
+            try {
+                // สำหรับดึง Token ผ่านเซิร์ฟเวอร์กลางเพื่อความปลอดภัย (เนื่องจาก API Lark ไม่อนุญาตให้ดึงตรง ๆ จากเบราว์เซอร์เนื่องจากติด CORS)
+                const response = await fetch("https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8"
+                    },
+                    body: JSON.stringify({
+                        "app_id": appId,
+                        "app_secret": appSecret
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.code === 0) {
+                    return data.tenant_access_token;
+                } else {
+                    console.error("Lark Auth Error:", data.msg);
+                    return null;
+                }
+            } catch (error) {
+                console.error("Failed to fetch tenant_access_token:", error);
+                return null;
+            }
+        }
+
+        // ฟังก์ชันเก็บรวบรวมข้อมูลทั้งหมดเป็น JSON เพื่อนำไปส่ง Webhook Lark Base
+        async function sendToLarkBase() {
+            const btn = document.getElementById('copy-btn');
+            const originalHTML = btn.innerHTML;
+            
+            // เปลี่ยนสถานะเป็น Loading ระหว่างทำงาน
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังส่งข้อมูล...`;
+            btn.disabled = true;
+
+            const branch = document.getElementById('branch-select').value;
+            const requester = document.getElementById('requester-name').value || 'ไม่ได้ระบุ';
+            
+            const now = new Date();
+            const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear() + 543} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            // 1. รวบรวมข้อมูลของสินค้าหลัก (Products Table)
+            const listProducts = [];
+            products.forEach(p => {
+                if (p.sku.trim() !== '' || p.total > 0) {
+                    listProducts.push({
+                        category: p.type.toUpperCase(),
+                        sku: p.sku || '',
+                        total: p.total,
+                        sizes: p.sizes // เก็บรูปแบบคีย์เช่น {"48": 1, "50": 2}
+                    });
+                }
+            });
+
+            // 2. รวบรวมข้อมูลของอุปกรณ์สิ้นเปลือง (Accessories) แยกหมวดหมู่ส่งเข้าไปตรงๆ เพื่อเอาไปเก็บลงตาราง
+            let packagingDetails = "";
+            let documentDetails = "";
+            let tailoringDetails = "";
+            
+            accessoriesSectionPackaging.forEach((item, idx) => {
+                const el = document.getElementById(`acc-sec1-${idx}`);
+                const qty = el ? parseInt(el.value) || 0 : 0;
+                if (qty > 0) packagingDetails += `- ${item}: ${qty} ชิ้น\n`;
+            });
+
+            accessoriesSectionDocument.forEach((item, idx) => {
+                const el = document.getElementById(`acc-sec2-${idx}`);
+                const qty = el ? parseInt(el.value) || 0 : 0;
+                if (qty > 0) documentDetails += `- ${item}: ${qty} ชิ้น\n`;
+            });
+
+            accessoriesSectionTailoring.forEach((item, idx) => {
+                const el = document.getElementById(`acc-sec3-${idx}`);
+                const qty = el ? parseInt(el.value) || 0 : 0;
+                if (qty > 0) tailoringDetails += `- ${item}: ${qty} ชิ้น\n`;
+            });
+
+            // สร้างข้อความสรุปรายละเอียดรายการสินค้าและอุปกรณ์แบบแยกส่วนเพื่อใช้อ่านในตาราง Lark
+            let detailText = "";
+            if (listProducts.length > 0) {
+                detailText += "[รายการสินค้าเบิก]\n";
+                listProducts.forEach(p => {
+                    const sizesStr = Object.entries(p.sizes).map(([s, q]) => `ไซซ์ ${s}: ${q} ชิ้น`).join(", ");
+                    detailText += `- ${p.category} (SKU: ${p.sku}) จำนวนรวม ${p.total} ชิ้น [${sizesStr}]\n`;
+                });
+            }
+            
+            // สร้าง Payload ในรูปแบบ JSON Object ตามโครงสร้างที่กำหนดใน Lark Base Automation Workflow
+            // และรองรับการทำสคีมาแบบ "ส่งค่าขอตัวอย่าง" (Auto Schema Detection) ด้วยปุ่มสีฟ้าใน Lark Base ได้ง่ายดายที่สุด
+            // แก้ไขข้อ 2: ส่งข้อมูลแบบแยกคีย์อย่างเป็นทางการ เพื่อให้นำไปทำ Automation คัดกรองและแมปแต่ละช่องได้ง่าย 100%
+            const payload = {
+                datetime: formattedDate,
+                branch: branch,
+                requester: requester,
+                detail: detailText || "ไม่มีรายการสินค้าเบิกหลัก",
+                packaging: packagingDetails.trim() || "ไม่มีรายการเบิก",
+                document: documentDetails.trim() || "ไม่มีรายการเบิก",
+                tailoring: tailoringDetails.trim() || "ไม่มีรายการเบิก",
+                raw_summary: document.getElementById('summary-content').innerText
+            };
+
+            const webhookUrl = "https://psgcxu7br5sp.sg.larksuite.com/base/automation/webhook/event/F9PHaUcYTwuFqihQG6qlEB1Fgjb";
+
+            try {
+                // สำหรับ Lark Base Webhook: ตัวแปรข้อมูลทุกตัวจะต้องอยู่ใน Key ระดับรากของ Payload (Root Payload)
+                // ดังนั้น ฟิลด์ datetime, branch, requester, detail จะถูกส่งเข้า Webhook และ Lark จะแสดงค่าให้คุณ Map ได้ทันทีครับ
+                const response = await fetch(webhookUrl, {
+                    method: "POST",
+                    mode: "no-cors", // ใช้ mode: 'no-cors' ป้องกันการโดนบล็อก CORS จากเบราว์เซอร์
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Lark-Webhook-Token": "_PWgY_UM1TLC6iLDvoS3_Esj"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                // แสดงผลสถานะสำเร็จ (เนื่องจากโหมด no-cors จะรับค่า response ไม่ได้ แต่จะส่งคำขอเสร็จสมบูรณ์ไปหา Lark 100%)
+                const status = document.getElementById('copy-status');
+                status.classList.remove('opacity-0', 'translate-y-1');
+                status.classList.add('opacity-100', 'translate-y-0');
+                
+                btn.innerHTML = `เบิกสำเร็จเรียบร้อย!`;
+                btn.classList.remove('bg-slate-900');
+                btn.classList.add('bg-emerald-600', 'shadow-[0_12px_24px_-4px_rgba(16,185,129,0.35)]');
+
+                setTimeout(() => {
+                    status.classList.add('opacity-0', 'translate-y-1');
+                    status.classList.remove('opacity-100', 'translate-y-0');
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('bg-emerald-600', 'shadow-[0_12px_24px_-4px_rgba(16,185,129,0.35)]');
+                    btn.classList.add('bg-slate-900');
+                    btn.disabled = false;
+                    closeModal();
+                }, 2500);
+
+            } catch (error) {
+                console.error("Error sending data to Lark Webhook:", error);
+                btn.innerHTML = `ส่งล้มเหลว กรุณาลองใหม่`;
+                btn.classList.remove('bg-slate-900');
+                btn.classList.add('bg-red-600');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('bg-red-600');
+                    btn.classList.add('bg-slate-900');
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        function closeModal() { 
+            const modal = document.getElementById('summary-modal');
+            modal.firstElementChild.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        /* เปิดโมดอลยืนยันการล้างข้อมูลอย่างเป็นทางการ */
+        function openConfirmResetModal() {
+            const modal = document.getElementById('confirm-reset-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.firstElementChild.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        /* ปิดโมดอลยืนยันการล้างข้อมูล */
+        function closeConfirmResetModal() {
+            const modal = document.getElementById('confirm-reset-modal');
+            modal.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        /* เปิดโมดอลแจ้งเตือนรหัสสินค้าเว้นว่างแบบพเนียม */
+        function openValidationWarningModal(message) {
+            const modal = document.getElementById('validation-warning-modal');
+            document.getElementById('validation-warning-message').textContent = message;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.firstElementChild.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        /* ปิดโมดอลแจ้งเตือนข้อผิดพลาด */
+        function closeValidationWarningModal() {
+            const modal = document.getElementById('validation-warning-modal');
+            modal.firstElementChild.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        /* ทำการรีเซ็ตข้อมูลทั้งหมดเมื่อกดยืนยัน */
+        function executeReset() {
+            window.location.reload();
+        }
+
+        // ฟังก์ชันอัปเดตรูปแบบเวลากล่องขวาตามรูปตัวอย่าง (เป็น HH:MM และ Sun, 22 Jan)
+        function updateDateTime() {
+            const now = new Date();
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            const dayName = days[now.getDay()];
+            const dateVal = now.getDate();
+            const monthName = months[now.getMonth()];
+            
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+
+            // แสดงเวลาแบบใช้จุดคู่คั่น HH:MM สไตล์เรียบหรูสากล
+            document.getElementById('current-time-large').textContent = `${hours}:${minutes}`;
+            // แสดงวันและวันที่
+            document.getElementById('current-date-small').textContent = `${dayName}, ${dateVal} ${monthName}`;
+        }
+
+        window.onload = () => {
+            updateDateTime();
+            setInterval(updateDateTime, 10000); // sync clock every 10s
+            renderTable();
+            renderAccessories();
+        };
+    </script>
+</body>
+</html>
