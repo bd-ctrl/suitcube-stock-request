@@ -243,11 +243,12 @@
                 <!-- iOS Info Selectors Bubble (กระจกใสสีสว่าง) -->
                 <div class="ios-bubble-card p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/60 max-w-md w-full sm:w-auto">
                     
-                    <!-- Branch Code Selector (ปรับหัวข้อ label-branch เป็น font-normal ตามที่สั่ง) -->
+                    <!-- Branch Code Selector (ข้อ 2: "กรุณาเลือก" เป็นตัวอักษรบาง และเปลี่ยนเป็นตัวหนาเมื่อพนักงานทำการเลือก) -->
                     <div class="px-5 py-2.5 flex flex-col justify-center flex-1 sm:flex-none sm:w-44">
                         <label id="label-branch" class="text-[14px] font-normal text-slate-500 mb-1 transition-colors">สาขาที่เบิก</label>
                         <div class="relative flex items-center">
-                            <select id="branch-select" class="w-full text-[16px] font-extrabold text-[#8a632d] bg-transparent outline-none cursor-pointer appearance-none">
+                            <select id="branch-select" onchange="handleBranchChange(this)" class="w-full text-[16px] font-normal text-slate-400 bg-transparent outline-none cursor-pointer appearance-none">
+                                <option value="" disabled selected>กรุณาเลือก</option>
                                 <option>BP</option>
                                 <option>PK</option>
                                 <option>RCD</option>
@@ -460,38 +461,34 @@
     </div>
 
     <!-- หน้าต่างแจ้งเตือนข้อผิดพลาดพรีเมียม (Premium Validation Warning Modal) -->
-    <div id="validation-warning-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden flex items-center justify-center p-6 transition-opacity duration-300">
+    <!-- ปิดการทำงานอันซ้ำซ้อนเก่าออกทั้งหมด เหลือเพียงระบบ UI สมบูรณ์แบบระบบเดียวตามที่กำหนด -->
+    <div id="validation-warning-modal" onclick="closeValidationWarningModalOnBackdrop(event)" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden flex items-center justify-center p-6 transition-opacity duration-300">
         <div class="bg-white/95 backdrop-blur-lg w-full max-sm:max-w-[340px] max-w-sm rounded-[30px] overflow-hidden shadow-2xl border border-white/40 scale-95 opacity-0 transition-all duration-300 transform animate-modal">
             
             <!-- Warning Header -->
             <div class="bg-[#9e2a2b] px-6 py-5 text-white flex justify-between items-center relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-                <div class="relative z-10">
-                    <h3 class="text-lg font-normal tracking-tight">ไม่สามารถส่งแบบเบิกได้</h3>
+                <div class="relative z-10 flex justify-between items-center w-full">
+                    <!-- ข้อความหัวเรื่องแจ้งเตือนตรงตามต้องการแน่นอนร้อยเปอร์เซ็นต์ -->
+                    <h3 class="text-lg font-normal tracking-tight">กรุณากรอกข้อมูลให้ครบถ้วนก่อนส่ง</h3>
+                    <button onclick="closeValidationWarningModal()" class="bubble-btn w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
-                <button onclick="closeValidationWarningModal()" class="bubble-btn w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors relative z-10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
             </div>
 
-            <!-- Warning Body -->
+            <!-- Warning Body (เอาปุ่มรับทราบออกถาวร ปิดด้วยปุ่ม X หรือจิ้มข้างนอกเพื่อความสะดวกของพนักงาน) -->
             <div class="p-6 text-center space-y-6">
-                <div class="space-y-3">
+                <div class="space-y-3 pb-4">
                     <div class="w-12 h-12 rounded-full bg-red-50 text-[#9e2a2b] flex items-center justify-center mx-auto mb-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     </div>
                     <p class="text-slate-600 text-base font-semibold" id="validation-warning-message">
                         ยังไม่ได้กรอกรหัสสินค้า
                     </p>
-                    <p class="text-xs text-slate-400">
+                    <p class="text-xs text-slate-400" id="validation-warning-submessage">
                         กรุณากรอกรหัสสินค้าในแถวที่มีการระบุจำนวนให้ครบถ้วนก่อนส่งเบิก
                     </p>
-                </div>
-                
-                <div class="pt-2">
-                    <button onclick="closeValidationWarningModal()" class="bubble-btn w-full py-3.5 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl font-normal text-sm transition-all shadow-sm">
-                        รับทราบ
-                    </button>
                 </div>
             </div>
         </div>
@@ -527,6 +524,18 @@
 
         let products = [{ id: Date.now(), sku: '', type: 'jacket', sizes: {}, total: 0 }];
 
+        // สลับสไตล์ของ Select สาขา (ข้อ 2: "กรุณาเลือก" เป็นฟอนต์ตัวบาง และเปลี่ยนเป็นตัวหนาเมื่อพนักงานคลิกเลือก)
+        function handleBranchChange(selectEl) {
+            if (!selectEl) return;
+            if (selectEl.value === "") {
+                selectEl.classList.remove('font-extrabold', 'text-[#8a632d]');
+                selectEl.classList.add('font-normal', 'text-slate-400');
+            } else {
+                selectEl.classList.remove('font-normal', 'text-slate-400');
+                selectEl.classList.add('font-extrabold', 'text-[#8a632d]');
+            }
+        }
+
         // Real-time calculation and state preservation
         // อัปเดตเพื่อให้ส่งค่า payload ที่ Lark ต้องการได้ง่ายขึ้น
         function updateProduct(id, field, value) {
@@ -544,6 +553,7 @@
         }
 
         // Live calculations matching requirements
+        // อัปเดตเพื่อแก้ปัญหาระบบเบิก
         function updateSize(id, size, value) {
             const p = products.find(x => x.id === id);
             if (!p) return;
@@ -840,10 +850,58 @@
             }).join('');
         }
 
+        // ล้างข้อมูลทั้งหมดในแอป (ข้อ 4: ล้างข้อมูลโดยอัตโนมัติเมื่อทำรายการสำเร็จ)
+        function clearAllAppFields() {
+            // ล้างผู้เบิกและตัวเลือกสาขา (ข้อ 1: กลับมาเป็น default "กรุณาเลือก")
+            const selectEl = document.getElementById('branch-select');
+            selectEl.selectedIndex = 0;
+            handleBranchChange(selectEl);
+            document.getElementById('requester-name').value = '';
+            
+            // ล้างหน้าตารางสินค้าหลัก
+            products = [{ id: Date.now(), sku: '', type: 'jacket', sizes: {}, total: 0 }];
+            renderTable();
+
+            // ล้างการค้นหารหัสสินค้า
+            document.getElementById('sku-search-input').value = '';
+            clearSearchFilter();
+
+            // ล้างช่องป้อนจำนวนอุปกรณ์สิ้นเปลืองทั้งหมด
+            accessoriesSectionPackaging.forEach((item, idx) => {
+                const el = document.getElementById(`acc-sec1-${idx}`);
+                if (el) {
+                    el.value = '';
+                    el.classList.remove('has-value');
+                    const parentCard = el.closest('.accessory-item-card');
+                    if (parentCard) parentCard.classList.remove('active-filled');
+                }
+            });
+
+            accessoriesSectionDocument.forEach((item, idx) => {
+                const el = document.getElementById(`acc-sec2-${idx}`);
+                if (el) {
+                    el.value = '';
+                    el.classList.remove('has-value');
+                    const parentCard = el.closest('.accessory-item-card');
+                    if (parentCard) parentCard.classList.remove('active-filled');
+                }
+            });
+
+            accessoriesSectionTailoring.forEach((item, idx) => {
+                const el = document.getElementById(`acc-sec3-${idx}`);
+                if (el) {
+                    el.value = '';
+                    el.classList.remove('has-value');
+                    const parentCard = el.closest('.accessory-item-card');
+                    if (parentCard) parentCard.classList.remove('active-filled');
+                }
+            });
+        }
+
         function prepareSummary() {
             // ดึงข้อมูลหลัก
             const branch = document.getElementById('branch-select').value;
-            const requester = document.getElementById('requester-name').value || 'ไม่ได้ระบุ';
+            const requester = document.getElementById('requester-name').value.trim();
             
             // ดึงข้อความวันเวลาปัจจุบันและจัดฟอร์แมตในรูปแบบ DD/MM/YYYY HH:MM เพื่อใช้สำหรับสรุปในรายงาน (เหมาะสมกับการแชร์เข้า LINE)
             const now = new Date();
@@ -854,10 +912,21 @@
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const reportFormattedDateTime = `${day}/${month}/${yearStr} ${hours}:${minutes}`;
 
-            // --- ตรวจสอบรหัสสินค้าเว้นว่างขณะมีจำนวน (Validation Check) ---
+            // --- ข้อ 1 & 2: ตรวจสอบความถูกต้องของการกรอกข้อมูลทั่วไป ---
+            if (!branch || branch === "") {
+                openValidationWarningModal("กรุณาเลือกสาขาที่เบิก", "กรุณาเลือกสาขาที่ทำรายการเบิกจากเมนูดรอปดาวน์ก่อนทำการบันทึกข้อมูล");
+                return;
+            }
+
+            if (requester === "") {
+                openValidationWarningModal("กรุณากรอกชื่อผู้เบิก", "กรุณากรอกชื่อเล่นของผู้เบิกในช่องผู้เบิก (ชื่อเล่น) ก่อนทำการบันทึกข้อมูล");
+                return;
+            }
+
+            // --- ข้อ 3: ตรวจสอบรหัสสินค้าเว้นว่างขณะมีจำนวน (Validation Check) ---
             let hasEmptySKU = false;
             products.forEach(p => {
-                // หากมีการระบุจำนวนขนาดใด ๆ (total > 0) แต่ SKU เป็นช่องว่างเปล่า
+                // หากมีการเลือก Category และระบุไซซ์เรียบร้อย (total > 0) แต่รหัส SKU เป็นค่าว่างเปล่า
                 if (p.total > 0 && p.sku.trim() === '') {
                     hasEmptySKU = true;
                 }
@@ -865,7 +934,7 @@
 
             // หากมีช่องรหัสสินค้าว่างเปล่า ให้เปิดโมดอล Validation แจ้งเตือน และหยุดฟังก์ชันทันที
             if (hasEmptySKU) {
-                openValidationWarningModal("ยังไม่ได้กรอกรหัสสินค้า");
+                openValidationWarningModal("กรุณากรอกรหัสสินค้า", "คุณป้อนจำนวนในตารางสินค้าไว้แต่ไม่ได้กรอกรหัสสินค้า (SKU) กรุณากรอกรหัสสินค้าในแถวที่มีจำนวนให้ครบถ้วน");
                 return;
             }
 
@@ -999,13 +1068,24 @@
             const btn = document.getElementById('copy-btn');
             const originalHTML = btn.innerHTML;
             
+            const branch = document.getElementById('branch-select').value;
+            const requester = document.getElementById('requester-name').value.trim();
+
+            // ตรวจสอบความปลอดภัยซ้ำก่อนจะยิง Webhook จริง
+            if (!branch || branch === "") {
+                openValidationWarningModal("กรุณาเลือกสาขาที่เบิก", "กรุณาเลือกสาขาที่ทำรายการเบิกจากเมนูดรอปดาวน์ก่อนทำการบันทึกข้อมูล");
+                return;
+            }
+
+            if (requester === "") {
+                openValidationWarningModal("กรุณากรอกชื่อผู้เบิก", "กรุณากรอกชื่อเล่นของผู้เบิกในช่องผู้เบิก (ชื่อเล่น) ก่อนทำการบันทึกข้อมูล");
+                return;
+            }
+            
             // เปลี่ยนสถานะเป็น Loading ระหว่างทำงาน
             btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังส่งข้อมูล...`;
             btn.disabled = true;
 
-            const branch = document.getElementById('branch-select').value;
-            const requester = document.getElementById('requester-name').value || 'ไม่ได้ระบุ';
-            
             const now = new Date();
             const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear() + 543} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
@@ -1093,6 +1173,7 @@
                 btn.classList.remove('bg-slate-900');
                 btn.classList.add('bg-emerald-600', 'shadow-[0_12px_24px_-4px_rgba(16,185,129,0.35)]');
 
+                // ข้อ 4: ทำการล้างข้อมูลบันทึกทั้งหมดทันทีเมื่อส่งข้อมูลสำเร็จสมบูรณ์
                 setTimeout(() => {
                     status.classList.add('opacity-0', 'translate-y-1');
                     status.classList.remove('opacity-100', 'translate-y-0');
@@ -1100,6 +1181,9 @@
                     btn.classList.remove('bg-emerald-600', 'shadow-[0_12px_24px_-4px_rgba(16,185,129,0.35)]');
                     btn.classList.add('bg-slate-900');
                     btn.disabled = false;
+                    
+                    // เรียกใช้งานฟังก์ชันรีเซ็ตค่าข้อมูลแอปทั้งหมด
+                    clearAllAppFields();
                     closeModal();
                 }, 2500);
 
@@ -1147,10 +1231,11 @@
             document.body.style.overflow = 'auto';
         }
 
-        /* เปิดโมดอลแจ้งเตือนรหัสสินค้าเว้นว่างแบบพเนียม */
-        function openValidationWarningModal(message) {
+        /* เปิดโมดอลแจ้งเตือนรหัสสินค้าเว้นว่างและ Validation พรีเมียม */
+        function openValidationWarningModal(message, submessage = "กรุณากรอกรหัสสินค้าในแถวที่มีการระบุจำนวนให้ครบถ้วนก่อนส่งเบิก") {
             const modal = document.getElementById('validation-warning-modal');
             document.getElementById('validation-warning-message').textContent = message;
+            document.getElementById('validation-warning-submessage').textContent = submessage;
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.firstElementChild.classList.remove('scale-95', 'opacity-0');
@@ -1166,6 +1251,14 @@
                 modal.classList.add('hidden');
             }, 300);
             document.body.style.overflow = 'auto';
+        }
+
+        /* ฟังก์ชันปิดหน้าต่างเตือนเมื่อคลิกพื้นที่ด้านนอก Backdrop */
+        function closeValidationWarningModalOnBackdrop(e) {
+            const modalContent = document.querySelector('#validation-warning-modal > div');
+            if (modalContent && !modalContent.contains(e.target)) {
+                closeValidationWarningModal();
+            }
         }
 
         /* ทำการรีเซ็ตข้อมูลทั้งหมดเมื่อกดยืนยัน */
@@ -1197,6 +1290,8 @@
             setInterval(updateDateTime, 10000); // sync clock every 10s
             renderTable();
             renderAccessories();
+            // เรียกฟังก์ชันเพื่อตรวจสอบสไตล์สาขาเริ่มต้น
+            handleBranchChange(document.getElementById('branch-select'));
         };
     </script>
 </body>
